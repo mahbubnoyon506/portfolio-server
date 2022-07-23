@@ -11,7 +11,7 @@ app.use(express.json());
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.fjohh.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
-console.log(uri)
+
 
 
 
@@ -19,6 +19,8 @@ async function run(){
     try{
         await client.connect();
         const projectsCollections = client.db('PortfolioAPI').collection('projects');
+        const resultsCollections = client.db('PortfolioAPI').collection('results');
+
 
     app.get('/projects', async(req, res) => {
         const result = await projectsCollections.find().toArray();
@@ -28,6 +30,23 @@ async function run(){
         const id = req.params.id;
         const query = {_id: ObjectId(id)};
         const result = await projectsCollections.findOne(query);
+        res.send(result);
+    })
+
+    ///////////////////
+    app.get('/results', async (req, res) => {
+        const query = {};
+        const limit = Number(req.query.limit);
+        const pageNumber = Number(req.query.pageNumber);
+        const cursor = resultsCollections.find(query);
+        const count = await resultsCollections.estimatedDocumentCount();
+        const result = await cursor.skip(limit*pageNumber).limit(limit).toArray();
+        res.send({success: true, data: result, count})
+    })
+    app.get('/results/:id', async (req, res) => {
+        const id = req.params.id;
+        const query = {_id: ObjectId(id)};
+        const result = await resultsCollections.findOne(query);
         res.send(result);
     })
 
@@ -46,4 +65,6 @@ app.get('/', (req, res) => {
 app.listen( port, () => {
     console.log('App is listening with port', port)
 })
+
+
 
