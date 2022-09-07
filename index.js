@@ -20,6 +20,8 @@ async function run(){
         await client.connect();
         const projectsCollections = client.db('PortfolioAPI').collection('projects');
         const resultsCollections = client.db('PortfolioAPI').collection('results');
+        const userValuesCollections = client.db('PortfolioAPI').collection('userValues');
+        
 
 
     app.get('/projects', async(req, res) => {
@@ -47,6 +49,17 @@ async function run(){
         const id = req.params.id;
         const query = {_id: ObjectId(id)};
         const result = await resultsCollections.findOne(query);
+        res.send(result);
+    })
+
+    //////////////////////
+    app.get('/uservalues', async(req, res) =>{
+        const result = await userValuesCollections.find().toArray();
+        res.send(result);
+    })
+    app.post('/uservalues', async(req, res) =>{
+        const query = req.body;
+        const result = await userValuesCollections.insertOne(query);
         res.send(result);
     })
 
